@@ -8,10 +8,11 @@
 import sys
 from pathlib import Path
 from fastapi import FastAPI, Form
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 import uvicorn
 from typing import Optional
 import json
+import re
 
 # 添加项目根目录到Python路径
 project_root = Path(__file__).parent.parent.parent
@@ -74,6 +75,7 @@ def get_web_interface():
                 margin-bottom: 20px;
                 box-shadow: 0 2px 30px rgba(255, 192, 203, 0.15), 0 1px 8px rgba(0, 0, 0, 0.04);
                 border: 1px solid rgba(255, 255, 255, 0.6);
+                position: relative;
             }
 
             .header h1 {
@@ -94,6 +96,181 @@ def get_web_interface():
                 font-size: 0.85em;
                 font-weight: 300;
                 letter-spacing: 0.5px;
+            }
+
+            .settings-button {
+                position: absolute;
+                right: 20px;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 40px;
+                height: 40px;
+                background: linear-gradient(135deg, #e8d5f2, #d4a5d6);
+                border: none;
+                border-radius: 50%;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 0 2px 12px rgba(212, 165, 214, 0.2);
+            }
+
+            .settings-button:hover {
+                transform: translateY(-50%) scale(1.05);
+                box-shadow: 0 4px 20px rgba(212, 165, 214, 0.35);
+            }
+
+            .settings-button i {
+                color: #6b5b7f;
+                font-size: 18px;
+            }
+
+            .modal-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                backdrop-filter: blur(5px);
+                z-index: 1000;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .modal-overlay.show {
+                display: flex;
+            }
+
+            .settings-modal {
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
+                border-radius: 24px;
+                padding: 30px;
+                width: 90%;
+                max-width: 450px;
+                box-shadow: 0 8px 50px rgba(212, 165, 214, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.6);
+                animation: modalSlide 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            @keyframes modalSlide {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .modal-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 25px;
+            }
+
+            .modal-title {
+                color: #6b5b7f;
+                font-size: 1.4em;
+                font-weight: 500;
+                letter-spacing: 0.5px;
+            }
+
+            .close-button {
+                width: 32px;
+                height: 32px;
+                background: none;
+                border: none;
+                color: #9b7eab;
+                font-size: 24px;
+                cursor: pointer;
+                transition: all 0.2s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .close-button:hover {
+                color: #6b5b7f;
+                transform: scale(1.1);
+            }
+
+            .form-group {
+                margin-bottom: 20px;
+            }
+
+            .form-label {
+                display: block;
+                color: #6b5b7f;
+                font-weight: 400;
+                margin-bottom: 10px;
+                font-size: 0.95em;
+            }
+
+            .form-select {
+                width: 100%;
+                padding: 12px 15px;
+                border: 1.5px solid rgba(232, 213, 242, 0.3);
+                border-radius: 12px;
+                background: rgba(255, 255, 255, 0.9);
+                font-size: 0.95em;
+                color: #5a4d6a;
+                font-family: inherit;
+                transition: all 0.3s;
+                cursor: pointer;
+            }
+
+            .form-select:focus {
+                outline: none;
+                border-color: #d4a5d6;
+                box-shadow: 0 0 0 3px rgba(212, 165, 214, 0.12);
+            }
+
+            .form-input {
+                width: 100%;
+                padding: 12px 15px;
+                border: 1.5px solid rgba(232, 213, 242, 0.3);
+                border-radius: 12px;
+                background: rgba(255, 255, 255, 0.9);
+                font-size: 0.95em;
+                color: #5a4d6a;
+                font-family: inherit;
+                transition: all 0.3s;
+            }
+
+            .form-input:focus {
+                outline: none;
+                border-color: #d4a5d6;
+                box-shadow: 0 0 0 3px rgba(212, 165, 214, 0.12);
+            }
+
+            .save-button {
+                width: 100%;
+                padding: 14px;
+                background: linear-gradient(135deg, #e8d5f2, #d4a5d6);
+                border: none;
+                border-radius: 12px;
+                color: #6b5b7f;
+                font-size: 1em;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.3s;
+                box-shadow: 0 3px 18px rgba(212, 165, 214, 0.25);
+            }
+
+            .save-button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 28px rgba(212, 165, 214, 0.35);
+                background: linear-gradient(135deg, #d4a5d6, #c295c8);
+            }
+
+            .save-button:active {
+                transform: translateY(0);
             }
 
             .chat-container {
@@ -670,6 +847,9 @@ def get_web_interface():
         <div class="container">
             <div class="header">
                 <h1>✨ 心理咨询伴侣</h1>
+                <button class="settings-button" onclick="openSettings()">
+                    <i class="fas fa-cog"></i>
+                </button>
             </div>
 
             <div class="chat-container">
@@ -718,6 +898,51 @@ def get_web_interface():
                     <button type="submit" class="send-button" id="sendButton">
                         <i class="fas fa-paper-plane"></i>
                     </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 设置模态框 -->
+        <div class="modal-overlay" id="settingsModal">
+            <div class="settings-modal">
+                <div class="modal-header">
+                    <h2 class="modal-title">⚙️ 语音设置</h2>
+                    <button class="close-button" onclick="closeSettings()">×</button>
+                </div>
+                
+                <form id="settingsForm" onsubmit="return saveSettings(event)">
+                    <div class="form-group">
+                        <label class="form-label">语音角色</label>
+                        <select id="voiceSelect" class="form-select" name="voice">
+                            <option value="longanhuan">龙安欢 - 欢脱元气女</option>
+                            <option value="longanyang">龙安洋 - 阳光大男孩</option>
+                            <option value="longyingxun_v3">龙应询 - 年轻青涩男</option>
+                            <option value="longyingjing_v3">龙应静 - 低调冷静女</option>
+                            <option value="longyingling_v3">龙应聆 - 温和共情女</option>
+                            <option value="longyingtao_v3">龙应桃 - 温柔淡定女</option>
+                            <option value="longxiaochun_v3">龙小淳 - 知性积极女</option>
+                            <option value="longyumi_v3">YUMI - 正经青年女</option>
+                            <option value="longxiaoxia_v3">龙小夏 - 沉稳权威女</option>
+                            <option value="longanwen_v3">龙安温 - 优雅知性女</option>
+                            <option value="longanyun_v3">龙安昀 - 居家暖男</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">语音速度 (0.5-2.0)</label>
+                        <input 
+                            type="number" 
+                            id="rateInput" 
+                            class="form-input" 
+                            name="rate" 
+                            min="0.5" 
+                            max="2.0" 
+                            step="0.1" 
+                            placeholder="1.0"
+                        >
+                    </div>
+                    
+                    <button type="submit" class="save-button">保存设置</button>
                 </form>
             </div>
         </div>
@@ -1025,6 +1250,106 @@ function showCopySuccess(button) {
         button.classList.remove('copied');
     }, 2000);
 }
+
+// 设置相关函数
+async function openSettings() {
+    const modal = document.getElementById('settingsModal');
+    modal.classList.add('show');
+    
+    // 加载当前设置
+    try {
+        const response = await fetch('/get_settings');
+        const data = await response.json();
+        
+        console.log('=== 加载当前设置 ===');
+        console.log('当前语音:', data.voice);
+        console.log('当前语速:', data.rate);
+        
+        if (data.success) {
+            const voiceSelect = document.getElementById('voiceSelect');
+            const rateInput = document.getElementById('rateInput');
+            
+            voiceSelect.value = data.voice;
+            rateInput.value = data.rate;
+            
+            console.log('设置已应用到表单');
+            console.log('voiceSelect.value =', voiceSelect.value);
+            console.log('rateInput.value =', rateInput.value);
+        }
+    } catch (error) {
+        console.error('加载设置失败:', error);
+    }
+}
+
+function closeSettings() {
+    const modal = document.getElementById('settingsModal');
+    modal.classList.remove('show');
+}
+
+async function saveSettings(event) {
+    event.preventDefault();
+    
+    const voiceSelect = document.getElementById('voiceSelect');
+    const voice = voiceSelect.value;
+    const rate = document.getElementById('rateInput').value;
+    
+    // 调试信息
+    console.log('=== 保存设置 ===');
+    console.log('选中的语音:', voice);
+    console.log('语音选项文本:', voiceSelect.options[voiceSelect.selectedIndex].text);
+    console.log('语速:', rate);
+    
+    // 验证语速范围
+    if (rate < 0.5 || rate > 2.0) {
+        alert('语速必须在 0.5 到 2.0 之间');
+        return false;
+    }
+    
+    try {
+        const response = await fetch('/update_settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `voice=${encodeURIComponent(voice)}&rate=${encodeURIComponent(rate)}`
+        });
+        
+        const data = await response.json();
+        console.log('服务器返回:', data);
+        
+        if (data.success) {
+            alert(`设置已保存！\n语音角色: ${data.voice}\n语速: ${data.rate}\n\n新的语音设置将在下次对话时生效。`);
+            closeSettings();
+        } else {
+            alert('保存设置失败: ' + data.error);
+        }
+    } catch (error) {
+        console.error('保存设置失败:', error);
+        alert('保存设置时出错，请稍后重试。');
+    }
+    
+    return false;
+}
+
+// 点击模态框外部关闭
+document.addEventListener('click', function(event) {
+    const modal = document.getElementById('settingsModal');
+    if (event.target === modal) {
+        closeSettings();
+    }
+});
+
+// 页面加载时获取当前设置
+window.addEventListener('load', async function() {
+    try {
+        const response = await fetch('/get_settings');
+        const data = await response.json();
+        
+        if (data.success) {
+            console.log('当前TTS设置:', data);
+        }
+    } catch (error) {
+        console.error('获取设置失败:', error);
+    }
+});
 </script>
     </body>
     </html>
@@ -1095,6 +1420,109 @@ async def get_info():
             "success": False,
             "error": str(e)
         }
+
+
+@app.get("/get_settings")
+async def get_settings():
+    """获取当前TTS设置"""
+    try:
+        # 优先从TTS服务实例读取（实时的），如果不存在则从config.py读取
+        if rag_system.tts_service:
+            voice = rag_system.tts_service.voice
+            rate = str(rag_system.tts_service.rate)
+        else:
+            # 降级：直接读取config.py文件获取最新值
+            config_path = Path(__file__).parent.parent / "config.py"
+            with open(config_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            import re
+            voice_match = re.search(r'TTS_VOICE\s*=\s*["\']([^"\']*)["\']', content)
+            rate_match = re.search(r'TTS_RATE\s*=\s*["\']([^"\']*)["\']', content)
+            
+            voice = voice_match.group(1) if voice_match else "longanhuan"
+            rate = rate_match.group(1) if rate_match else "1"
+        
+        print(f"📖 读取TTS设置: voice={voice}, rate={rate}")
+        
+        return JSONResponse({
+            "success": True,
+            "voice": voice,
+            "rate": rate
+        })
+    except Exception as e:
+        print(f"❌ 读取设置失败: {e}")
+        return JSONResponse({
+            "success": False,
+            "error": str(e)
+        })
+
+
+@app.post("/update_settings")
+async def update_settings(voice: str = Form(...), rate: str = Form(...)):
+    """更新TTS设置到config.py文件"""
+    try:
+        print(f"\n{'='*60}")
+        print(f"📝 接收到设置更新请求:")
+        print(f"   voice = {voice}")
+        print(f"   rate = {rate}")
+        
+        # 读取config.py文件
+        config_path = Path(__file__).parent.parent / "config.py"
+        with open(config_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # 使用正则表达式替换TTS_VOICE
+        new_content = re.sub(
+            r'TTS_VOICE\s*=\s*["\'][^"\']*["\']',
+            f'TTS_VOICE = "{voice}"',
+            content
+        )
+        
+        # 使用正则表达式替换TTS_RATE
+        new_content = re.sub(
+            r'TTS_RATE\s*=\s*["\'][^"\']*["\']',
+            f'TTS_RATE = "{rate}"',
+            new_content
+        )
+        
+        # 写回文件
+        with open(config_path, 'w', encoding='utf-8') as f:
+            f.write(new_content)
+        
+        print(f"✅ config.py 文件已更新")
+        
+        # 更新全局变量（这样不需要重启就能生效）
+        import src.config as config_module
+        config_module.TTS_VOICE = voice
+        config_module.TTS_RATE = rate
+        print(f"✅ 全局变量已更新")
+        
+        # 更新TTS服务实例的配置（最重要！）
+        if rag_system.tts_service:
+            rag_system.tts_service.voice = voice
+            rag_system.tts_service.rate = rate
+            print(f"✅ TTS服务实例已更新")
+            print(f"   当前TTS服务配置: voice={rag_system.tts_service.voice}, rate={rag_system.tts_service.rate}")
+        else:
+            print(f"⚠️ TTS服务实例不存在")
+        
+        print(f"{'='*60}\n")
+        
+        return JSONResponse({
+            "success": True,
+            "message": "设置已更新",
+            "voice": voice,
+            "rate": rate
+        })
+    except Exception as e:
+        print(f"❌ 更新设置失败: {e}")
+        import traceback
+        traceback.print_exc()
+        return JSONResponse({
+            "success": False,
+            "error": str(e)
+        })
 
 
 def main():

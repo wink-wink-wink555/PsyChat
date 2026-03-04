@@ -9,6 +9,7 @@ from typing import List, Dict, Any
 from src.data.processor import DataProcessor
 from src.core.vector_store import VectorStore
 from src.agent.psychology_agent import PsychologyAgent
+from src.core.tts_service import TTSService
 from src.config import *
 
 class RAGSystem:
@@ -17,6 +18,13 @@ class RAGSystem:
         self.data_processor = DataProcessor()
         self.vector_store = VectorStore()
         self.psychology_agent = PsychologyAgent()
+        
+        # 初始化TTS服务
+        try:
+            self.tts_service = TTSService()
+        except Exception as e:
+            print(f"⚠️ TTS服务初始化失败: {e}")
+            self.tts_service = None
         
         # 初始化DeepSeek LLM配置
         self.deepseek_api_key = DEEPSEEK_API_KEY
@@ -168,6 +176,25 @@ class RAGSystem:
             
             # 3. 更新对话历史
             self._update_conversation_history(query, result['response'])
+            
+            # 4. 语音合成与播放（生成音频并开始播放后返回，播放过程异步进行）
+            if self.tts_service and TTS_ENABLED:
+                try:
+                    print("\n" + "="*60)
+                    print("🎤 开始语音合成...")
+                    # async_play=True: 音频文件生成后立即开始播放并返回（播放在后台继续）
+                    audio_path = self.tts_service.synthesize_and_play(
+                        result['response'], 
+                        play_audio=True,
+                        async_play=True  # 异步播放：开始播放后立即返回
+                    )
+                    if audio_path:
+                        result['audio_path'] = audio_path
+                        # 清理旧音频文件（保留最近10个）
+                        self.tts_service.clean_old_audio_files(keep_last_n=10)
+                    print("="*60 + "\n")
+                except Exception as e:
+                    print(f"⚠️ TTS服务调用失败: {e}")
             
             return result
             
