@@ -15,12 +15,12 @@ PROJECT_ROOT = Path(__file__).parent.parent
 # =============================================================================
 
 # DeepSeek API配置
-DEEPSEEK_API_KEY = "sk-b4d9701afd3f48d0a2e2ca45c104c2e4"  # DeepSeek API密钥
+DEEPSEEK_API_KEY = ""  # DeepSeek API密钥
 DEEPSEEK_BASE_URL = "https://api.deepseek.com"  # DeepSeek API地址
 DEEPSEEK_MODEL = "deepseek-chat"  # DeepSeek聊天模型
 
 # 阿里云百炼Embedding配置
-ALIBABA_API_KEY = "sk-3e8a19e0f26a4b8b80fb871d22ed4613"  # 阿里云百炼API密钥
+ALIBABA_API_KEY = ""  # 阿里云百炼API密钥
 EMBEDDING_MODEL = "text-embedding-v4"  # 阿里云百炼Embedding模型
 
 # 阿里云百炼语音合成(TTS)配置
@@ -69,4 +69,5 @@ SIMILARITY_THRESHOLD = 0.15
 
 # 对话持续监控配置
 MAX_NO_RAG_ROUNDS = 3
+
 
