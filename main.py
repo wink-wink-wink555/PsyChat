@@ -14,7 +14,7 @@ from pathlib import Path
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
-from src.core.rag_system import RAGSystem
+from core.rag_system import RAGSystem
 import argparse
 
 
@@ -53,14 +53,14 @@ def main():
     
     if args.cli:
         # 命令行交互模式
-        from src.core.rag_system import main as cli_main
+        from core.rag_system import main as cli_main
         cli_main()
         return
     
     # 默认启动Web界面
     print("🚀 启动Web界面...")
     try:
-        from src.web.interface import main as web_main
+        from web.interface import main as web_main
         web_main()
     except ImportError as e:
         print(f"❌ 启动Web界面失败: {e}")
