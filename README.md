@@ -38,7 +38,7 @@
 ## 🏗️ 系统架构
 
 <details>
-<summary><strong>整体工作流流程图（点击展开）</strong></summary>
+<summary><strong>整体工作流流程图  <em>（点击展开）</em></strong></summary>
   
 ```mermaid
 graph TD
