@@ -329,7 +329,7 @@ PsyChat/
 
 详细的语音功能配置和使用说明，请参考 [TTS功能指南](docs/TTS_GUIDE.md)。
 
-支持的音色：
+支持的音色（包括但不限于）：
 - `longanyang` - 温柔男声（默认）
 - `longxiaochun` - 温柔女声
 - `longjing` - 平和女声
