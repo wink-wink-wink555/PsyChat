@@ -200,7 +200,7 @@ chunk 首行文本 → 在原始 .txt 文件中定位 → 通过 ## 分隔符找
 ### 1. 克隆项目
 
 ```bash
-git clone https://github.com/your-username/PsyChat.git
+git clone https://github.com/wink-wink-wink555/PsyChat.git
 cd PsyChat
 ```
 
