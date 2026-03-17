@@ -1,7 +1,7 @@
 <p align="center">
   <h1 align="center">💝 PsyChat</h1>
   <p align="center">
-    <strong>基于 RAG 技术的智能心理咨询伴侣</strong>
+    <strong>基于 Agentic RAG 的智能心理咨询伴侣</strong>
   </p>
   <p align="center">
     基于范例模仿真实心理咨询师的话语模式，为用户提供专业的心理健康支持
