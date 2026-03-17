@@ -64,7 +64,7 @@ TTS_ENABLED = False  # 禁用TTS
 
 ### 更改音色
 
-支持的音色包括：
+支持的音色包括但不限于：
 - `longanyang` - 温柔男声（默认，适合心理咨询）
 - `longxiaochun` - 温柔女声
 - `longjing` - 平和女声
