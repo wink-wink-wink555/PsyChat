@@ -253,14 +253,6 @@ python main.py --cli
 
 访问 http://localhost:8000 即可开始对话！
 
-### 6. 测试语音功能（可选）
-
-```bash
-python test_tts.py
-```
-
-按照提示选择测试项目，验证语音合成功能是否正常工作。
-
 ---
 
 ## 📁 项目结构
