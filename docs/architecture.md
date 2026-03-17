@@ -7,42 +7,45 @@
 
 ```mermaid
 graph TD
-    A[用户输入] --> B{Psychology Agent<br/>智能决策层}
-    
-    B --> C{是否需要RAG?}
-    C -->|YES| D[主题分类]
-    C -->|NO| E[直接生成回答]
-    
-    D --> F[轻检索获取锚点]
-    F --> G{是否需要改写?}
-    
-    G -->|YES| H[引导式查询改写]
-    G -->|NO| I[使用原始查询]
-    
-    H --> J[向量检索<br/>ChromaDB]
-    I --> J
-    
-    J --> K{找到相关文档?}
-    K -->|YES| L[构建上下文]
-    K -->|NO| E
-    
-    L --> M[LLM生成回答<br/>DeepSeek]
-    E --> M
-    
-    M --> N[更新对话历史]
-    N --> O{对话监控Agent<br/>连续3轮无RAG?}
-    
-    O -->|YES| P[强制触发RAG检索]
-    O -->|NO| Q[返回结果]
-    
-    P --> D
-    Q --> R[输出回答]
-    
-    style B fill:#667eea,color:#fff
-    style J fill:#764ba2,color:#fff
-    style O fill:#ff9a9e,color:#fff
-    style M fill:#fecfef,color:#333
+    A[用户输入] --> B[Psychology Agent 决策层]
+
+    B --> C{RAG判断 + 主题分类\n单次LLM调用}
+
+    C -->|不需要检索| D[对话持续监控\n连续N轮无RAG?]
+    D -->|未超限| E[直接回答\nREBT提示词]
+    D -->|已超限| F[🚨 强制触发RAG]
+
+    C -->|需要检索| G[ReAct 查询优化循环\n最多3轮]
+    F --> G
+
+    G --> G1[Observation: 轻检索获取锚点 top3]
+    G1 --> G2[Thought+Action: 分析锚点质量]
+    G2 -->|FINISH| H[使用当前查询词]
+    G2 -->|REWRITE| G1
+
+    H --> I[多查询词向量检索\nChromaDB]
+
+    I --> J{找到相关文档?}
+    J -->|未找到| E
+    J -->|找到| K[上下文扩展\n纯I/O 无LLM]
+
+    K --> K1[通过chunk锚点\n回溯原始完整对话]
+    K1 --> L[咨询师话术分析\n带主题缓存]
+
+    L --> L1{缓存命中?}
+    L1 -->|命中| M[复用话术分析结果\n0次LLM]
+    L1 -->|未命中| L2[LLM分析4维度话术共性\n1次LLM]
+    L2 --> M
+
+    M --> N[构建增强提示词\n完整案例+片段+话术+策略]
+    E --> O
+    N --> O[LLM生成最终回答]
+
+    O --> P[更新对话历史]
+    P --> Q[语音合成TTS]
+    Q --> R[返回结果]
 ```
+
 
 ## 系统架构层次
 
@@ -82,24 +85,6 @@ graph LR
     style C1 fill:#ff9a9e,color:#fff
     style D1 fill:#fecfef,color:#333
 ```
-
-## 核心组件说明
-
-### 1. Psychology Agent（智能决策层）
-- **功能**：智能判断是否需要RAG、主题分类、查询改写
-- **特点**：基于LLM的决策能力，动态调整检索策略
-
-### 2. RAG System（主控制器）
-- **功能**：整合Agent、向量库、LLM，管理对话流程
-- **特点**：对话历史管理、强制检索监控
-
-### 3. Vector Store（检索层）
-- **功能**：向量存储、语义检索、主题过滤
-- **技术**：ChromaDB + Alibaba Embedding
-
-### 4. Conversation Monitor（对话监控）
-- **功能**：追踪连续无RAG轮数，自动触发强制检索
-- **阈值**：连续3轮无RAG触发
 
 ## 技术栈
 - **LLM**: DeepSeek Chat
