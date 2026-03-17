@@ -37,8 +37,9 @@
 
 ## 🏗️ 系统架构
 
-### 整体工作流
-
+<details>
+<summary><strong>整体工作流</strong></summary>
+  
 ```mermaid
 graph TD
     A[用户输入] --> B[Psychology Agent 决策层]
@@ -79,6 +80,7 @@ graph TD
     P --> Q[语音合成TTS]
     Q --> R[返回结果]
 ```
+</details>
 
 ### 各阶段详解
 
